@@ -508,6 +508,10 @@ pop_access <- point_data_table %>% as_tibble() %>%
   summarise(mean_time_access = mean(exp(mean)),
             pop_by_mean_time_access = mean(exp(mean) * n_person),
             dis_by_mean_time_access = mean(exp(mean) * n_disability),
+            pop_by_median_time_access = median(exp(mean) * n_person),
+            dis_by_median_time_access = median(exp(mean) * n_disability),
+            pop_by_median_time_access_median = median(exp(median) * n_person),
+            dis_by_median_time_access_median = median(exp(median) * n_disability),
             n_person = first(n_person),
             n_disability = first(n_disability)) %>%
   mutate(prop_disability = n_disability / n_person) %>%
@@ -515,6 +519,24 @@ pop_access <- point_data_table %>% as_tibble() %>%
   mutate(scaled_dis_by_mean_time_access = dis_by_mean_time_access / max(dis_by_mean_time_access, na.rm = T),
          scaled_pop_by_mean_time_access = pop_by_mean_time_access / max(pop_by_mean_time_access, na.rm = T)
   ) %>% left_join(sa2_dist_km)
+
+# check effect of median/mean
+
+ggplot(pop_access) + 
+  geom_point(aes(x = pop_by_mean_time_access, y = pop_by_median_time_access), alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0)
+
+ggplot(pop_access) + 
+  geom_point(aes(x = dis_by_mean_time_access, y =dis_by_median_time_access), alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0)
+
+ggplot(pop_access) + 
+  geom_point(aes(x = pop_by_mean_time_access, y = pop_by_median_time_access_median), alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0)
+
+ggplot(pop_access) + 
+  geom_point(aes(x = dis_by_mean_time_access, y =dis_by_median_time_access_median), alpha = 0.5) +
+  geom_abline(slope = 1, intercept = 0)
 
 for(svc in service_list){
   temp_tb <- pop_access %>% filter(service == svc) %>% arrange(-scaled_dis_by_mean_time_access) %>% head(n = 20)
